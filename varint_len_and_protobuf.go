@@ -6,22 +6,22 @@ import (
 	"github.com/gogo/protobuf/proto"
 )
 
-// ProtoBufWriter writes a length in the variable-length encoding
+// MessageWriter writes a length in the variable-length encoding
 // and the following bytes in the protocol buffer encoding.
-type ProtoBufWriter struct {
+type MessageWriter struct {
 	*BytesWriter
 }
 
-// NewProtoBufWriter creates a ProtoBufWriter with the underlying
+// NewMessageWriter creates a MessageWriter with the underlying
 // writer.
-func NewProtoBufWriter(w io.Writer) *ProtoBufWriter {
-	return &ProtoBufWriter{BytesWriter: NewBytesWriter(w)}
+func NewMessageWriter(w io.Writer) *MessageWriter {
+	return &MessageWriter{BytesWriter: NewBytesWriter(w)}
 }
 
-// WriteVarintLenAndProtoBuf writes a length in the variable-length encoding
+// WriteVarintLenAndMessage writes a length in the variable-length encoding
 // and the following encoded bytes to the underlying writer. It returns the number of
 // bytes written for the length and the number of bytes written for pb.
-func (w *ProtoBufWriter) WriteVarintLenAndProtoBuf(pb proto.Message) (n1, n2 int, err error) {
+func (w *MessageWriter) WriteVarintLenAndMessage(pb proto.Message) (n1, n2 int, err error) {
 	buf, err := proto.Marshal(pb)
 	if err != nil {
 		return
@@ -30,23 +30,23 @@ func (w *ProtoBufWriter) WriteVarintLenAndProtoBuf(pb proto.Message) (n1, n2 int
 	return
 }
 
-// ProtoBufReader reads a length in the variable-length encoding
+// MessageReader reads a length in the variable-length encoding
 // and the following bytes in the protocol buffer encoding.
-type ProtoBufReader struct {
+type MessageReader struct {
 	*BytesReader
 }
 
-// NewProtoBufReader creates a ProtoBufReader with the underlying
+// NewMessageReader creates a MessageReader with the underlying
 // reader.
-func NewProtoBufReader(r io.Reader) *ProtoBufReader {
-	return &ProtoBufReader{BytesReader: NewBytesReader(r)}
+func NewMessageReader(r io.Reader) *MessageReader {
+	return &MessageReader{BytesReader: NewBytesReader(r)}
 }
 
-// ReadVarintLenAndProtoBuf reads a length in the variable-length encoding
+// ReadVarintLenAndMessage reads a length in the variable-length encoding
 // and the following encoded bytes. It uses buf if the length of buf is large
 // enough or makes a new buffer and returns it, the number of bytes
 // read for the length and the number of bytes read for pb.
-func (r *ProtoBufReader) ReadVarintLenAndProtoBuf(pb proto.Message, buf []byte) (bufOrNewBuf []byte, n1, n2 int, err error) {
+func (r *MessageReader) ReadVarintLenAndMessage(pb proto.Message, buf []byte) (bufOrNewBuf []byte, n1, n2 int, err error) {
 	bufOrNewBuf, n1, n2, err = r.ReadVarintLenAndBytes(buf)
 	if err != nil {
 		return

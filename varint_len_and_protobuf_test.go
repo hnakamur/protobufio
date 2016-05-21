@@ -7,7 +7,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 )
 
-func TestReadVarintLenAndProtoBuf(t *testing.T) {
+func TestReadVarintLenAndMessage(t *testing.T) {
 	w := new(bytes.Buffer)
 	values := []struct {
 		msg ExampleMessage
@@ -32,12 +32,12 @@ func TestReadVarintLenAndProtoBuf(t *testing.T) {
 	}
 
 	var buf []byte
-	r := NewProtoBufReader(bytes.NewBuffer(w.Bytes()))
+	r := NewMessageReader(bytes.NewBuffer(w.Bytes()))
 	for _, value := range values {
 		var got ExampleMessage
 		var n1, n2 int
 		var err error
-		buf, n1, n2, err = r.ReadVarintLenAndProtoBuf(&got, buf)
+		buf, n1, n2, err = r.ReadVarintLenAndMessage(&got, buf)
 		if err != nil {
 			t.Error(err)
 		}
@@ -64,7 +64,7 @@ func TestReadVarintLenAndProtoBuf(t *testing.T) {
 	}
 }
 
-func TestWriteVarintLenAndProtoBuf(t *testing.T) {
+func TestWriteVarintLenAndMessage(t *testing.T) {
 	values := []struct {
 		msg ExampleMessage
 		n1  int
@@ -75,9 +75,9 @@ func TestWriteVarintLenAndProtoBuf(t *testing.T) {
 	}
 
 	writeBuf := new(bytes.Buffer)
-	w := NewProtoBufWriter(writeBuf)
+	w := NewMessageWriter(writeBuf)
 	for i, value := range values {
-		n1, n2, err := w.WriteVarintLenAndProtoBuf(&value.msg)
+		n1, n2, err := w.WriteVarintLenAndMessage(&value.msg)
 		values[i].n1 = n1
 		values[i].n2 = n2
 		if err != nil {
