@@ -1,0 +1,10 @@
+// After editing this file, run /usr/local/protobuf3/bin/protoc --go_out=. *.proto
+syntax="proto3";
+
+package binaryio;
+
+message ExampleMessage {
+  string label = 1;
+  sint32 type = 2;
+  repeated sint64 reps = 3;
+}
