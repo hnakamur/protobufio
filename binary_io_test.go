@@ -3,7 +3,6 @@ package binaryio
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"math"
 	"testing"
 )
@@ -13,8 +12,7 @@ func TestReadVarint(t *testing.T) {
 	n1 := binary.PutVarint(buf, math.MaxInt8)
 	n2 := binary.PutVarint(buf[n1:], math.MaxInt16)
 	n3 := binary.PutVarint(buf[n1+n2:], math.MaxInt32)
-	n4 := binary.PutVarint(buf[n1+n2+n3:], math.MaxInt64)
-	fmt.Printf("n1=%d, n2=%d, n3=%d, n4=%d\n", n1, n2, n3, n4)
+	_ = binary.PutVarint(buf[n1+n2+n3:], math.MaxInt64)
 
 	r := NewVarintReader(bytes.NewBuffer(buf))
 	v, err := r.ReadVarint()

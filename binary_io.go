@@ -58,19 +58,5 @@ func NewVarintWriter(w io.Writer) *VarintWriter {
 // number of bytes written.
 func (w *VarintWriter) WriteVarint(v int64) (n int, err error) {
 	n = binary.PutVarint(w.buf[:], v)
-	return WriteFull(w.writer, w.buf[:n])
-}
-
-// WriteFull writes all bytes in the buf to the writer w and
-// return the number of bytes written.
-func WriteFull(w io.Writer, buf []byte) (n int, err error) {
-	for n < len(buf) {
-		var n2 int
-		n2, err = w.Write(buf[n:])
-		n += n2
-		if err != nil {
-			return
-		}
-	}
-	return
+	return w.writer.Write(w.buf[:n])
 }
