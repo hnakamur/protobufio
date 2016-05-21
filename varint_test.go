@@ -12,36 +12,48 @@ func TestReadVarint(t *testing.T) {
 	n1 := binary.PutVarint(buf, math.MaxInt8)
 	n2 := binary.PutVarint(buf[n1:], math.MaxInt16)
 	n3 := binary.PutVarint(buf[n1+n2:], math.MaxInt32)
-	_ = binary.PutVarint(buf[n1+n2+n3:], math.MaxInt64)
+	n4 := binary.PutVarint(buf[n1+n2+n3:], math.MaxInt64)
 
 	r := NewVarintReader(bytes.NewBuffer(buf))
-	v, err := r.ReadVarint()
+	v, n, err := r.ReadVarint()
 	if err != nil {
 		t.Error(err)
+	}
+	if n != n1 {
+		t.Errorf("unexpected number of read bytes. got=%v; want=%v", n, n1)
 	}
 	if v != math.MaxInt8 {
 		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt8)
 	}
 
-	v, err = r.ReadVarint()
+	v, n, err = r.ReadVarint()
 	if err != nil {
 		t.Error(err)
+	}
+	if n != n2 {
+		t.Errorf("unexpected number of read bytes. got=%v; want=%v", n, n2)
 	}
 	if v != math.MaxInt16 {
 		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt16)
 	}
 
-	v, err = r.ReadVarint()
+	v, n, err = r.ReadVarint()
 	if err != nil {
 		t.Error(err)
+	}
+	if n != n3 {
+		t.Errorf("unexpected number of read bytes. got=%v; want=%v", n, n3)
 	}
 	if v != math.MaxInt32 {
 		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt32)
 	}
 
-	v, err = r.ReadVarint()
+	v, n, err = r.ReadVarint()
 	if err != nil {
 		t.Error(err)
+	}
+	if n != n4 {
+		t.Errorf("unexpected number of read bytes. got=%v; want=%v", n, n4)
 	}
 	if v != math.MaxInt64 {
 		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt64)

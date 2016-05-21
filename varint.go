@@ -12,8 +12,9 @@ import (
 // See https://golang.org/pkg/encoding/binary/ for the
 // variable-length encoding.
 type VarintReader struct {
-	reader io.Reader
-	buf    [1]byte
+	reader    io.Reader
+	buf       [1]byte
+	bytesRead int
 }
 
 // NewVarintReader creates a VarintReader with the
@@ -26,6 +27,7 @@ func NewVarintReader(r io.Reader) *VarintReader {
 // and the byte read.
 func (r *VarintReader) ReadByte() (c byte, err error) {
 	n, err := r.reader.Read(r.buf[:])
+	r.bytesRead += n
 	if n > 0 {
 		c = r.buf[0]
 	}
@@ -33,9 +35,12 @@ func (r *VarintReader) ReadByte() (c byte, err error) {
 }
 
 // ReadVarint reads and returns an integer from the
-// underlying reader.
-func (r *VarintReader) ReadVarint() (v int64, err error) {
-	return binary.ReadVarint(r)
+// underlying reader and the number of bytes read.
+func (r *VarintReader) ReadVarint() (v int64, n int, err error) {
+	r.bytesRead = 0
+	v, err = binary.ReadVarint(r)
+	n = r.bytesRead
+	return
 }
 
 // VarintWriter is a writer for writing integers in the
