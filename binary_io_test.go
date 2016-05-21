@@ -3,112 +3,83 @@ package binaryio
 import (
 	"bytes"
 	"encoding/binary"
-	"io"
+	"fmt"
+	"math"
 	"testing"
 )
 
-func TestReadVarintLenAndBytes(t *testing.T) {
-	rbuf := new(bytes.Buffer)
-	l := int64(len("hello, world"))
-	_, err := WriteVariant(rbuf, l)
+func TestReadVarint(t *testing.T) {
+	buf := make([]byte, 4*binary.MaxVarintLen64)
+	n1 := binary.PutVarint(buf, math.MaxInt8)
+	n2 := binary.PutVarint(buf[n1:], math.MaxInt16)
+	n3 := binary.PutVarint(buf[n1+n2:], math.MaxInt32)
+	n4 := binary.PutVarint(buf[n1+n2+n3:], math.MaxInt64)
+	fmt.Printf("n1=%d, n2=%d, n3=%d, n4=%d\n", n1, n2, n3, n4)
+
+	r := NewVarintReader(bytes.NewBuffer(buf))
+	v, err := r.ReadVarint()
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = rbuf.WriteString("hello, world")
-	if err != nil {
-		t.Error(err)
+	if v != math.MaxInt8 {
+		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt8)
 	}
 
-	l = int64(len("goodbye, world"))
-	_, err = WriteVariant(rbuf, l)
+	v, err = r.ReadVarint()
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = rbuf.WriteString("goodbye, world")
+	if v != math.MaxInt16 {
+		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt16)
+	}
+
+	v, err = r.ReadVarint()
 	if err != nil {
 		t.Error(err)
 	}
-
-	r := bytes.NewBuffer(rbuf.Bytes())
-	buf, n, err := ReadVarintLenAndBytes(r)
-	if err != nil {
-		t.Errorf("readLengthAndBytes failed. err=%s", err)
-	}
-	if n != 1+len(buf) {
-		t.Errorf("unexpected read bytes. got=%v; want=%v", n, 1+len(buf))
-	}
-	got := string(buf)
-	want := "hello, world"
-	if got != want {
-		t.Errorf("unexpected result. got=%s; want=%s", got, want)
+	if v != math.MaxInt32 {
+		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt32)
 	}
 
-	buf, n, err = ReadVarintLenAndBytes(r)
+	v, err = r.ReadVarint()
 	if err != nil {
-		t.Errorf("readLengthAndBytes failed. err=%s", err)
+		t.Error(err)
 	}
-	if n != 1+len(buf) {
-		t.Errorf("unexpected read bytes. got=%v; want=%v", n, 1+len(buf))
-	}
-	got = string(buf)
-	want = "goodbye, world"
-	if got != want {
-		t.Errorf("unexpected result. got=%s; want=%s", got, want)
+	if v != math.MaxInt64 {
+		t.Errorf("unexpected value. got=%v; want=%v", v, math.MaxInt64)
 	}
 }
 
-func TestWriteVarintLenAndBytes(t *testing.T) {
-	w := new(bytes.Buffer)
-	buf := []byte("hello, world")
-	n, err := WriteVarintLenAndBytes(w, buf)
-	if err != nil {
-		t.Errorf("writeLengthAndBytes failed. err=%s", err)
+func TestWriteVarint(t *testing.T) {
+	buf := new(bytes.Buffer)
+	w := NewVarintWriter(buf)
+	cases := []struct {
+		v int64
+		n int
+	}{
+		{v: math.MaxInt8, n: 2},
+		{v: math.MaxInt16, n: 3},
+		{v: math.MaxInt32, n: 5},
+		{v: math.MaxInt64, n: 10},
 	}
-	if n != 1+len(buf) {
-		t.Errorf("unexpected written bytes. got=%v; want=%v", n, 1+len(buf))
+	for _, c := range cases {
+		n, err := w.WriteVarint(c.v)
+		if err != nil {
+			t.Errorf("error in WriteVariant. err=%v", err)
+		}
+		if n != c.n {
+			t.Errorf("unexpected number of written bytes. got=%v; want=%v", n, c.n)
+		}
 	}
-	buf = []byte("goodbye, world")
-	n, err = WriteVarintLenAndBytes(w, buf)
-	if err != nil {
-		t.Errorf("writeLengthAndBytes failed. err=%s", err)
-	}
-	if n != 1+len(buf) {
-		t.Errorf("unexpected written bytes. got=%v; want=%v", n, 1+len(buf))
-	}
-
-	r := bytes.NewBuffer(w.Bytes())
-	l, err := binary.ReadVarint(r)
-	if err != nil {
-		t.Error(err)
-	}
-	if l != int64(len("hello, world")) {
-		t.Errorf("unexpected result. got=%d; want=%d", l, int64(len("hello, world")))
-	}
-	buf = make([]byte, l)
-	_, err = io.ReadFull(r, buf)
-	got := string(buf)
-	want := "hello, world"
-	if got != want {
-		t.Errorf("unexpected result. got=%s; want=%s", got, want)
-	}
-	l, err = binary.ReadVarint(r)
-	if err != nil {
-		t.Error(err)
-	}
-	if err != nil {
-		t.Error(err)
-	}
-	if l != int64(len("goodbye, world")) {
-		t.Errorf("unexpected result. got=%d; want=%d", l, int64(len("hello, world")))
-	}
-	buf = make([]byte, l)
-	_, err = io.ReadFull(r, buf)
-	if err != nil {
-		t.Error(err)
-	}
-	got = string(buf)
-	want = "goodbye, world"
-	if got != want {
-		t.Errorf("unexpected result. got=%s; want=%s", got, want)
+	b := buf.Bytes()
+	for _, c := range cases {
+		v, n := binary.Varint(b)
+		if n != c.n {
+			t.Errorf("unexpected number of read bytes. got=%v; want=%v", n, c.n)
+		}
+		if v != c.v {
+			t.Errorf("unexpected read integer. got=%v; want=%v", v, c.v)
+		}
+		b = b[n:]
 	}
 }
