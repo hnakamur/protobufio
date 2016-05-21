@@ -18,7 +18,7 @@ func NewProtoBufWriter(w io.Writer) *ProtoBufWriter {
 	return &ProtoBufWriter{writer: NewBytesWriter(w)}
 }
 
-// WriteVarintLenAndBytes writes a length in the variable-length encoding
+// WriteVarintLenAndProtoBuf writes a length in the variable-length encoding
 // and the following encoded bytes to the underlying writer. It returns the number of
 // bytes written for the length and the number of bytes written for pb.
 func (w *ProtoBufWriter) WriteVarintLenAndProtoBuf(pb proto.Message) (n1, n2 int, err error) {
