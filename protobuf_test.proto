@@ -1,7 +1,7 @@
 // After editing this file, run /usr/local/protobuf3/bin/protoc --go_out=. *.proto
 syntax="proto3";
 
-package binaryio;
+package protobufio;
 
 message ExampleMessage {
   string label = 1;

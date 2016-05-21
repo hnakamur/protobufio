@@ -1,4 +1,4 @@
-package binaryio
+package protobufio
 
 import (
 	"bytes"

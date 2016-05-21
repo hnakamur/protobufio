@@ -1,6 +1,4 @@
-// Package binaryio provides wrapper functions which is easier to use than in functions
-// in the standard io and encoding/binary packges.
-package binaryio
+package protobufio
 
 import (
 	"encoding/binary"
