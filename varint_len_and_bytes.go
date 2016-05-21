@@ -5,35 +5,35 @@ import "io"
 // BytesWriter writes a length in the variable-length encoding
 // and the following bytes.
 type BytesWriter struct {
-	writer io.Writer
+	io.Writer
 }
 
 // NewBytesWriter creates a BytesWriter with the undelying writer.
 func NewBytesWriter(w io.Writer) *BytesWriter {
-	return &BytesWriter{writer: w}
+	return &BytesWriter{Writer: w}
 }
 
 // WriteVarintLenAndBytes writes a length in the variable-length encoding
 // and the following bytes in buf to the underlying writer. It returns the number of
 // bytes written for the length and the number of bytes written for bytes in buf.
 func (w *BytesWriter) WriteVarintLenAndBytes(buf []byte) (n1, n2 int, err error) {
-	n1, err = NewVarintWriter(w.writer).WriteVarint(int64(len(buf)))
+	n1, err = NewVarintWriter(w).WriteVarint(int64(len(buf)))
 	if err != nil {
 		return
 	}
-	n2, err = w.writer.Write(buf)
+	n2, err = w.Write(buf)
 	return
 }
 
 // BytesReader reads a length in the variable-length encoding
 // and the following bytes.
 type BytesReader struct {
-	reader io.Reader
+	io.Reader
 }
 
 // NewBytesReader creates a BytesReader with the underlying reader.
 func NewBytesReader(r io.Reader) *BytesReader {
-	return &BytesReader{reader: r}
+	return &BytesReader{Reader: r}
 }
 
 // ReadVarintLenAndBytes reads a length in the variable-length encoding
@@ -42,7 +42,7 @@ func NewBytesReader(r io.Reader) *BytesReader {
 // read for the length and the number of bytes read for the following
 // bytes. You can get the following bytes with bufOrNewBuf[:n2].
 func (r *BytesReader) ReadVarintLenAndBytes(buf []byte) (bufOrNewBuf []byte, n1, n2 int, err error) {
-	length, n1, err := NewVarintReader(r.reader).ReadVarint()
+	length, n1, err := NewVarintReader(r).ReadVarint()
 	if err != nil {
 		return
 	}
@@ -51,6 +51,6 @@ func (r *BytesReader) ReadVarintLenAndBytes(buf []byte) (bufOrNewBuf []byte, n1,
 	} else {
 		bufOrNewBuf = buf
 	}
-	n2, err = io.ReadFull(r.reader, bufOrNewBuf[:length])
+	n2, err = io.ReadFull(r, bufOrNewBuf[:length])
 	return
 }

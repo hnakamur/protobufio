@@ -10,7 +10,7 @@ import (
 // See https://golang.org/pkg/encoding/binary/ for the
 // variable-length encoding.
 type VarintReader struct {
-	reader    io.Reader
+	io.Reader
 	buf       [1]byte
 	bytesRead int
 }
@@ -18,13 +18,13 @@ type VarintReader struct {
 // NewVarintReader creates a VarintReader with the
 // underlying reader.
 func NewVarintReader(r io.Reader) *VarintReader {
-	return &VarintReader{reader: r}
+	return &VarintReader{Reader: r}
 }
 
 // ReadByte read a byte from the underlying reader
 // and the byte read.
 func (r *VarintReader) ReadByte() (c byte, err error) {
-	n, err := r.reader.Read(r.buf[:])
+	n, err := r.Read(r.buf[:])
 	r.bytesRead += n
 	if n > 0 {
 		c = r.buf[0]
@@ -46,14 +46,14 @@ func (r *VarintReader) ReadVarint() (v int64, n int, err error) {
 // See https://golang.org/pkg/encoding/binary/ for the
 // variable-length encoding.
 type VarintWriter struct {
-	writer io.Writer
-	buf    [binary.MaxVarintLen64]byte
+	io.Writer
+	buf [binary.MaxVarintLen64]byte
 }
 
 // NewVarintWriter creates a VarintWriter with the
 // underlying writer.
 func NewVarintWriter(w io.Writer) *VarintWriter {
-	return &VarintWriter{writer: w}
+	return &VarintWriter{Writer: w}
 }
 
 // WriteVarint writes an integer in the variable-length
@@ -61,5 +61,5 @@ func NewVarintWriter(w io.Writer) *VarintWriter {
 // number of bytes written.
 func (w *VarintWriter) WriteVarint(v int64) (n int, err error) {
 	n = binary.PutVarint(w.buf[:], v)
-	return w.writer.Write(w.buf[:n])
+	return w.Write(w.buf[:n])
 }

@@ -9,13 +9,13 @@ import (
 // ProtoBufWriter writes a length in the variable-length encoding
 // and the following bytes in the protocol buffer encoding.
 type ProtoBufWriter struct {
-	writer *BytesWriter
+	*BytesWriter
 }
 
 // NewProtoBufWriter creates a ProtoBufWriter with the underlying
 // writer.
 func NewProtoBufWriter(w io.Writer) *ProtoBufWriter {
-	return &ProtoBufWriter{writer: NewBytesWriter(w)}
+	return &ProtoBufWriter{BytesWriter: NewBytesWriter(w)}
 }
 
 // WriteVarintLenAndProtoBuf writes a length in the variable-length encoding
@@ -26,20 +26,20 @@ func (w *ProtoBufWriter) WriteVarintLenAndProtoBuf(pb proto.Message) (n1, n2 int
 	if err != nil {
 		return
 	}
-	n1, n2, err = w.writer.WriteVarintLenAndBytes(buf)
+	n1, n2, err = w.WriteVarintLenAndBytes(buf)
 	return
 }
 
 // ProtoBufReader reads a length in the variable-length encoding
 // and the following bytes in the protocol buffer encoding.
 type ProtoBufReader struct {
-	reader *BytesReader
+	*BytesReader
 }
 
 // NewProtoBufReader creates a ProtoBufReader with the underlying
 // reader.
 func NewProtoBufReader(r io.Reader) *ProtoBufReader {
-	return &ProtoBufReader{reader: NewBytesReader(r)}
+	return &ProtoBufReader{BytesReader: NewBytesReader(r)}
 }
 
 // ReadVarintLenAndProtoBuf reads a length in the variable-length encoding
@@ -47,7 +47,7 @@ func NewProtoBufReader(r io.Reader) *ProtoBufReader {
 // enough or makes a new buffer and returns it, the number of bytes
 // read for the length and the number of bytes read for pb.
 func (r *ProtoBufReader) ReadVarintLenAndProtoBuf(pb proto.Message, buf []byte) (bufOrNewBuf []byte, n1, n2 int, err error) {
-	bufOrNewBuf, n1, n2, err = r.reader.ReadVarintLenAndBytes(buf)
+	bufOrNewBuf, n1, n2, err = r.ReadVarintLenAndBytes(buf)
 	if err != nil {
 		return
 	}
