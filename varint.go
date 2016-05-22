@@ -25,9 +25,9 @@ func NewVarintReader(r io.Reader) *VarintReader {
 // and the byte read.
 func (r *VarintReader) ReadByte() (c byte, err error) {
 	n, err := r.Read(r.buf[:])
-	r.bytesRead += n
 	if n > 0 {
 		c = r.buf[0]
+		r.bytesRead++
 	}
 	return
 }
